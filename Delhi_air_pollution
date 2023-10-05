@@ -6,3 +6,256 @@ git branch -M main
 git remote add origin https://github.com/riaz-356/Delhi-air-pollution-Python.git
 git push -u origin main
 
+Analysing air pollution in Delhi
+
+import pandas as pd #importing pandas
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+delhi = pd.read_csv('delhi_aqi.csv') #use pandas to import CSV
+
+delhi.head() #check it works
+
+delhicol = ['Date', 'CO', 'NO', 'NO\u2082', 'O\u2083', 'SO\u2082', 'pm2.5', 'pm10', 'NH\u2083'] #rename columns for easier use
+delhi.columns = delhicol #make delhi become new columns bane
+delhi
+...
+plt.figure()
+plt.hist(delhi['NO'], bins=50, alpha=0.5, density=True) #density normalises the graph and changes the scale, alpha=0.5 makes the bins 50% translucent
+plt.hist(delhi['O\u2083'], bins=50, alpha=0.5, density=True) 
+plt.title('Delhi: Histogram for Concentration of NO and O\u2082') 
+plt.xlabel('Frequency') #y axis labelled
+plt.ylabel('Count (\u03BCg/m\u00B3)') #x axis labelled
+plt.show() #removes array of text before graph
+
+plt.figure()
+plt.hist(delhi['pm2.5'], bins=50, alpha=0.5, density=True) #density normalises the graph and changes the scale, alpha=0.5 makes the bins 50% translucent
+plt.hist(delhi['pm10'], bins=50, alpha=0.5, density=True)
+plt.title('Delhi: Histogram for Concentration of pm2.5 and pm10') 
+plt.xlabel('Frequency') #y axis labelled
+plt.ylabel('Count (\u03BCg/m\u00B3)') #x axis labelled
+plt.show()
+...
+sns.heatmap(delhi.corr(), annot=True, cmap='coolwarm') #using seaborn we plot correlation of variables in delhi data on heatmap, anot gives number and cmap gives colour gradient
+plt.show()
+
+sns.pairplot(delhi)
+plt.show()
+
+Here we realised heatmaps are much better than scatter plots.
+
+def bootstrapsies(data, step):
+    bootsample = np.random.choice(data, size=(step, len(data)), replace='True') #randomly select samples with replacement
+    return bootsample
+...
+plt.figure(figsize=(10, 5))
+
+plt.subplot(1, 2, 1)
+plt.hist(bootstrapmean, bins=40, density=True)
+plt.title('Bootstrap means distribution for pm10')
+plt.xlabel('Bootstrap means')
+plt.ylabel('Density')
+plt.tight_layout()
+plt.show()
+
+plt.subplot(1, 2, 2)
+plt.hist(bootstrapmed, bins=40, density=True)
+plt.title('Bootstrap median distribution for pm10')
+plt.xlabel('Bootstrap medians')
+plt.ylabel('Density')
+plt.tight_layout()
+plt.show()
+...
+import scipy as scp
+
+plt.figure(figsize = (10, 5))
+
+plt.subplot(1, 2, 1)
+scp.stats.probplot(bootstrapmean, plot = plt)
+plt.title('QQ plot bootstrap means')
+
+plt.subplot(1, 2, 2)
+scp.stats.probplot(bootstrapmed, plot = plt)
+plt.title('QQ plot bootstrap med')
+
+plt.show()
+
+Radial Velocity Detection and Characterisation of Extrasolar Planets
+My programming skill was in its infancy here.
+
+import numpy as np
+e = 0.6
+T = 0
+P = 20
+times = np.linspace(0, P, 1000)
+M = np.pi/2
+
+def kep(M, e, E):
+    E = E - e*np.sin(E) - M
+    return E
+def kep_p(e, E):
+    return 1 - e*np.cos(E)
+def newton_step(M, e, E):
+    return E - (kep(M, e, E)/kep_p(e, E))
+
+def Eccentric_func(M, e): #fix kepler solver function 'Eccentric func'
+    nitermax = 35
+    epsilon = 1.0e-8
+    step = 1
+    E = M
+    E1 = newton_step(kep(M, e, E), kep_p(e, E), E)
+    while abs(E - E1) > epsilon and step < nitermax:
+        
+        step += 1
+        E1, E = newton_step(M, e, E), E1
+        
+    return E1
+
+
+# def f_true_anomaly(e, E):
+
+# f_anom = np.arctan2(sinf(e, E), cosf(e, E))
+# return f_anom
+def Mean(t, P, T):
+    return (2*np.pi*(t - T))/P
+
+import numpy as np
+
+e = 0.6
+T = 0
+P = 500
+time = np.linspace(0, P, 1000)
+#fmean = []
+def f_anom(e, E):
+    sinf = np.sqrt(1-e**2)*np.sin(E)/(1-e*np.cos(E))
+    cosf= (np.cos(E) - e)/(1-e*np.cos(E))
+    return np.arctan2(sinf,cosf)
+
+def trueanomalys(times, e, P, T):
+    
+    f = np.zeros_like(time)
+
+    for i, t in enumerate(time):
+        M = Mean(t,P,T)
+# print(M)
+        E = Eccentric_func(Mean(t, P, T), e) #issue here
+        #print(E)
+        
+        f[i] = f_anom(e,E)
+        
+    return f
+#trueanomalys(time, e, P, T)
+...
+import numpy as np
+
+e = 0.6
+T = 0
+P = 20
+time = np.linspace(0, P, 1000)
+#fmean = []
+
+f = np.zeros_like(times)
+for i, t in enumerate(time):
+    M = Mean(t,P,T)
+# print(M)
+    E = Eccentric_func(Mean(t, P, T), e)
+    
+    f[i] = f_anom(e, E)
+    
+import matplotlib.pyplot as plt
+x = time
+y = f
+plt.title("Figure 1: True anomaly against time")
+plt.xlabel('$Times$') # note the use of dollar signs for LaTeX-like maths syntax
+plt.ylabel('$True Anomaly$')
+plt.scatter(x, y, s=5) # the s option here gives the size of the symbol
+# plt.ylim(-5,5)
+plt.grid()
+plt.plot()
+plt.show()
+...
+P = 500 #changes span across x axis
+K = 300 #changes peak height across y axis
+v = 18 #changes elevation
+T = 325 #shifts along x axis
+e = 0.7
+w = 0.4484*np.pi #changes a lot (in radian)
+time = np.linspace(0, P, 119)
+
+def radial_veloc(v,T,K,P,e,w,time):    
+    M = Mean(t, P, T)
+    E = Eccentric_func(M, e)
+    f= trueanomalys(times, e, P, T)
+    return v+K*np.cos(f+w)+e*np.cos(w)
+
+rvs = np.zeros_like(time)
+for i, t in enumerate(time):
+# M = Mean(t,P,T)
+# E = Eccentric_func(Mean(t, P, T), e)
+    
+    rvs = radial_veloc(v,T,K,P,e,w,time)
+    #write radial veloc equation
+    #pass equation throgh guess
+    #guesses should match plot
+
+# print(rvs) #could print array
+x = time
+y = rvs
+plt.xlabel('$Times$') # note the use of dollar signs for LaTeX-like maths syntax
+plt.ylabel('$Radialvelocity$')
+plt.scatter(x, y, s=1.8, color='red', linewidth=1.5) # the s option here gives the size of the symbol
+
+"""Loading columns of datasets"""
+timedata1, raddata1, errors1 = np.loadtxt('star-01.dat', unpack=True) #timedata1 IS THE TIME COLUMN FROM DATASET 1
+plt.plot(timedata1, raddata1, linestyle = 'None', marker = 'o')
+
+plt.title("Figure 2: Radial velocity of star 1 against time, with a line of best fit")
+plt.grid()
+plt.plot()
+plt.show()
+...
+P2 = 225 #changes span across x axis
+K2 = 300 #changes peak height across y axis
+v2 = 10 #changes elevation
+T2 = 100 #shifts along x axis
+e2 = 0.35
+
+w2 = 0.08*np.pi #changes a lot (in radian)
+
+time2 = np.linspace(0, P2, 119)
+
+rvs2 = np.zeros_like(time2)
+for i, t in enumerate(time2):
+# M = Mean(t,P,T)
+# E = Eccentric_func(Mean(t, P, T), e)
+    
+    rvs2 = radial_veloc(v2,T2,K2,P2,e2,w2,time2)
+    #write radial veloc equation
+    #pass equation throgh guess
+    #guesses should match plot
+
+x = time2
+y = rvs2
+plt.xlabel('$Times$') # note the use of dollar signs for LaTeX-like maths syntax
+plt.ylabel('$Radialvelocity$')
+plt.scatter(x, y, s=1.8, color='red', linewidth=1.5) # the s option here gives the size of the symbol
+
+timedata2, raddata2, errors2 = np.loadtxt('star-02.dat', unpack=True)
+plt.plot(timedata2, raddata2, linestyle = 'None', marker = 'o')
+plt.xlim(-5,125)
+plt.title("Figure 3: Radial velocity of star 2 against time, with a line of best fit")
+
+plt.grid()
+plt.plot()
+plt.show()
+
+...
+
+plt.scatter(timedata3, raddata3, s=4, label='Observed')
+plt.scatter(timefit3, radfit3, s=4, label='Fit')
+plt.title("Figure 7: Observed radial velocity and fitted radial velocity against time of star 3")
+plt.xlabel('$Time In Days$')
+plt.ylabel('$Radial velocity in ms^-1$')
+plt.grid()
+plt.legend()
